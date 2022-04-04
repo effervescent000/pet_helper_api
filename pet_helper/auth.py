@@ -22,38 +22,45 @@ multi_user_schema = UserSchema(many=True)
 
 
 @bp.route("/signup", methods=["POST"])
-def signup():
+def create_user():
     data = request.get_json()
+
     username = data.get("username")
     password = data.get("password")
-    if User.query.filter_by(username=username).first() == None:
-        new_user = User(username=username, password=User.hash_password(password))
-        db.session.add(new_user)
-        db.session.commit()
-        response = jsonify(one_user_schema.dump(new_user))
-        access_token = create_access_token(identity=username)
-        set_access_cookies(response, access_token)
-        return response
-    return jsonify("User already exists"), 401
+
+    if username and password:
+        if not User.query.filter_by(username=username).first():
+            new_user = User(username=username, password=User.hash_password(password))
+            db.session.add(new_user)
+            db.session.commit()
+
+            return generate_valid_user_response(new_user), 201
+    return jsonify({"error": "invalid input"}), 400
 
 
 @bp.route("/login", methods=["POST"])
-def login():
+def login_user():
     data = request.get_json()
+
     username = data.get("username")
     password = data.get("password")
-    user_query = User.query.filter_by(username=username).first()
-    if user_query == None:
-        return jsonify("Invalid username/password"), 401
-    if not user_query.check_password(password):
-        return jsonify("Invalid username/password"), 401
-    response = jsonify(one_user_schema.dump(user_query))
-    access_token = create_access_token(identity=username)
-    set_access_cookies(response, access_token)
-    return response
+
+    if username and password:
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if user.check_password(password):
+                return generate_valid_user_response(user)
+    return jsonify({"error": "invalid input"}), 400
 
 
 # utils
+
+
+def generate_valid_user_response(user):
+    response = jsonify(one_user_schema.dump(user))
+    access_token = create_access_token(identity=user)
+    set_access_cookies(response, access_token)
+    return response
 
 
 @current_app.after_request
@@ -69,6 +76,11 @@ def refresh_expiring_jwts(response):
     except (RuntimeError, KeyError):
         # Case where there is not a valid JWT. Just return the original respone
         return response
+
+
+@jwt.user_identity_loader
+def user_identity_lookup(user):
+    return user.username
 
 
 @jwt.user_lookup_loader

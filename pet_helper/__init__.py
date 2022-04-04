@@ -15,7 +15,7 @@ load_dotenv()
 
 
 def create_app(test_config=None):
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__)
 
     if test_config is None:
         app.config.from_object("config.Config")
@@ -36,5 +36,9 @@ def create_app(test_config=None):
         from .models import User, Pet, Event
 
         db.create_all()
+
+        from . import auth
+
+        app.register_blueprint(auth.bp)
 
         return app

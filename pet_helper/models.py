@@ -53,6 +53,7 @@ class Pet(db.Model):
 class Event(db.Model):
     __tablename__ = "events"
 
+    id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=False)
     type = db.Column(db.String(50), nullable=False)
     note = db.Column(db.Text)
