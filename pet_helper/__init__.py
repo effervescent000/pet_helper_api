@@ -41,4 +41,8 @@ def create_app(test_config=None):
 
         app.register_blueprint(auth.bp)
 
+        from . import pets
+
+        app.register_blueprint(pets.bp)
+
         return app
