@@ -22,3 +22,35 @@ def get_pets():
 
 
 # POST endpoints
+
+
+@bp.route("/", methods=["POST"])
+@jwt_required()
+def add_pet():
+    data = request.get_json()
+    owner_id = current_user.id
+    name = data.get("name")
+    if not name:
+        name = "Unnamed"
+    type = data.get("type")
+    if not type:
+        return jsonify({"error": "no type included in request"}), 400
+    species = data.get("species")
+    if not species:
+        species = "Unknown"
+    weight = data.get("weight")
+    feed_frequency = data.get("feed_frequency")
+    notes = data.get("notes")
+
+    pet = Pet(
+        name=name,
+        type=type,
+        species=species,
+        weight=weight,
+        feed_frequency=feed_frequency,
+        notes=notes,
+        owner_id=owner_id,
+    )
+    db.session.add(pet)
+    db.session.commit()
+    return jsonify(one_pet_schema.dump(pet))
