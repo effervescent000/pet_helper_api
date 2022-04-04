@@ -13,6 +13,7 @@ jwt = JWTManager()
 
 load_dotenv()
 
+
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
 
@@ -32,4 +33,8 @@ def create_app(test_config=None):
     jwt.init_app(app)
 
     with app.app_context():
+        from .models import User, Pet, Event
+
+        db.create_all()
+
         return app
