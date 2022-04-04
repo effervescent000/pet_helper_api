@@ -1,3 +1,4 @@
+from datetime import date
 import pytest
 
 from pet_helper import create_app, db
@@ -48,5 +49,50 @@ def populate_test_data():
     ]
     for x in user_list:
         x.password = User.hash_password("test_password")
+        db.session.add(x)
+        db.session.commit()
+
+    pet_list = [
+        Pet(
+            name="Rainbow Sherbert",
+            type="snake",
+            species="corn snake",
+            weight=500,
+            feed_frequency=10,
+            notes="cutie patootie",
+            date_fed=date.today(),
+            date_cleaned=date.today(),
+            owner_id=1,
+        ),
+        Pet(
+            name="Sweetheart",
+            type="snake",
+            species="ball python",
+            weight=800,
+            feed_frequency=18,
+            date_shed=date.today(),
+            owner_id=1,
+        ),
+    ]
+    for x in pet_list:
+        db.session.add(x)
+        db.session.commit()
+
+    events_list = [
+        Event(
+            date=date.today(),
+            type="feed reject",
+            note="test event here is an item",
+            owner_id=1,
+            pet_id=2,
+        ),
+        Event(
+            date=date.today(),
+            type="feed success",
+            owner_id=1,
+            pet_id=1,
+        ),
+    ]
+    for x in events_list:
         db.session.add(x)
         db.session.commit()
