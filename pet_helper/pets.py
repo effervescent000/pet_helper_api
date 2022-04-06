@@ -21,6 +21,17 @@ def get_pets():
     return jsonify(multi_pet_schema.dump(pets))
 
 
+@bp.route("/<id>", methods=["GET"])
+@jwt_required()
+def get_pet_by_id(id):
+    pet = Pet.query.get(id)
+    if pet:
+        if pet.owner_id == current_user.id or current_user.role == "admin":
+            return jsonify(one_pet_schema.dump(pet))
+        return jsonify({"error": "not authorized"}), 401
+    return jsonify({"error": "invalid pet"}), 400
+
+
 # POST endpoints
 
 

@@ -91,6 +91,14 @@ def populate_test_data():
             date_shed=date.today(),
             owner_id=1,
         ),
+        Pet(
+            name="Butterface",
+            type="snake",
+            species="kingsnake",
+            weight=400,
+            feed_frequency=10,
+            owner_id=3,
+        ),
     ]
     for x in pet_list:
         db.session.add(x)
