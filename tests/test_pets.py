@@ -60,6 +60,7 @@ def test_get_pet_by_id_invalid(client, user_header):
                 "feedFrequency": 20,
                 "notes": "awww baby",
                 "dateBorn": "2022-04-07T04:00:00.000Z",
+                "dateRemoved": "",
             }
         )
     ],
