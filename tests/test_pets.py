@@ -1,6 +1,10 @@
 import pytest
+from datetime import datetime
 
 from pet_helper.models import Pet
+from pet_helper.utils import time_format as front_end_time_format
+
+back_end_time_format = "%Y-%m-%dT%H:%M:%S"
 
 # GET endpoint tests
 
@@ -53,8 +57,9 @@ def test_get_pet_by_id_invalid(client, user_header):
                 "type": "snake",
                 "species": "ball python",
                 "weight": 1000,
-                "feed_frequency": 20,
+                "feedFrequency": 20,
                 "notes": "awww baby",
+                "dateBorn": "2022-04-07T04:00:00.000Z",
             }
         )
     ],
@@ -67,5 +72,9 @@ def test_add_pet(client, user_header, input_data):
     assert response.status_code == 200
     data = response.json
     assert data["id"]
-    for item in input_data.keys():
-        assert input_data[item] == data[item]
+    if input_data["name"]:
+        assert input_data["name"] == data["name"]
+    if input_data["dateBorn"]:
+        assert datetime.strptime(
+            input_data["dateBorn"], front_end_time_format
+        ) == datetime.strptime(data["date_born"], back_end_time_format)
