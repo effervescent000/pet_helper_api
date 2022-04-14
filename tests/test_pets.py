@@ -79,3 +79,18 @@ def test_add_pet(client, user_header, input_data):
         assert datetime.strptime(
             input_data["dateBorn"], front_end_time_format
         ) == datetime.strptime(data["date_born"], back_end_time_format)
+
+
+# PUT endpoint tests
+@pytest.mark.parametrize("input_data,id", [({"name": "babypants", "dateBorn": ""}, 3)])
+def test_update_pet_by_id(client, user_header, input_data, id):
+    response = client.put(f"/pets/{id}", json=input_data)
+    assert response.status_code == 401
+
+    response = client.put(f"/pets/{id}", json=input_data, headers=user_header)
+    assert response.status_code == 200
+    data = response.json
+    if input_data["name"]:
+        assert input_data["name"] == data["name"]
+    if input_data["dateBorn"]:
+        assert input_data["dateBorn"] == data["date_born"]
