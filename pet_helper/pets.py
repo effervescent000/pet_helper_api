@@ -186,3 +186,16 @@ def update_pet_by_id(id):
         return jsonify(one_pet_schema.dump(pet))
 
     return jsonify({"error": "unauthorized"}), 401
+
+
+@bp.route("/<id>", methods=["DELETE"])
+@jwt_required()
+def delete_pet_by_id(id):
+    pet = Pet.query.get(id)
+    if pet.owner_id == current_user.id:
+        db.session.delete(pet)
+        db.session.commit()
+        return jsonify(
+            multi_pet_schema.dump(Pet.query.filter_by(owner_id=current_user.id).all())
+        )
+    return jsonify({"error": "unauthorized"}), 401
