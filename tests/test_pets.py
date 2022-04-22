@@ -60,6 +60,7 @@ def test_get_pet_by_id_invalid(client, user_header):
                 "feedFrequency": 20,
                 "notes": "awww baby",
                 "dateBorn": "2022-04-07T04:00:00.000Z",
+                "dateRemoved": "",
             }
         )
     ],
@@ -78,3 +79,40 @@ def test_add_pet(client, user_header, input_data):
         assert datetime.strptime(
             input_data["dateBorn"], front_end_time_format
         ) == datetime.strptime(data["date_born"], back_end_time_format)
+
+
+# PUT endpoint tests
+@pytest.mark.parametrize(
+    "input_data,id",
+    [({"name": "babypants", "dateBorn": "", "species": "corn snake"}, 3)],
+)
+def test_update_pet_by_id(client, user_header, input_data, id):
+    response = client.put(f"/pets/{id}", json=input_data)
+    assert response.status_code == 401
+
+    response = client.put(f"/pets/{id}", json=input_data, headers=user_header)
+    assert response.status_code == 200
+    data = response.json
+    if input_data["name"]:
+        assert input_data["name"] == data["name"]
+    if input_data["dateBorn"]:
+        assert input_data["dateBorn"] == data["date_born"]
+    if input_data["species"]:
+        assert input_data["species"] == data["species"]
+
+
+# DELETE endpoint tests
+def test_delete_pet_by_id_as_user(client, user_header):
+    # request without header returns 401
+    response = client.delete("/pets/3")
+    assert response.status_code == 401
+
+    # request to a pet not owned by test_user returns 401
+    response = client.delete("/pets/1", headers=user_header)
+    assert response.status_code == 401
+
+    # valid request returns 200 and the list of pets owned by test_user
+    response = client.delete("/pets/3", headers=user_header)
+    assert response.status_code == 200
+    data = response.json
+    assert type(data) == list
